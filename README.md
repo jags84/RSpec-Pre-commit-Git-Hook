@@ -4,6 +4,7 @@ RSpec Git Pre-commit Hook
 This is a improve version of the rspec-precommit,
 
 We add the this features
+
 1. Show what specs are failing
 2. Add Color to the results
 3. Add Loading while waiting to finish the rspec
