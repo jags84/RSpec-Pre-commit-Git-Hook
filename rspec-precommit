@@ -70,13 +70,13 @@ end
 
 def print_authors
   puts "\n==============================================================\n\n"
-  puts " Forked from:"
-  puts " https://github.com/markhazlett/RSpec-Pre-commit-Git-Hook"
-  puts ""
   puts " Library to run RSpec before git commit"
   puts "  https://jags84.github.io"
   puts "  https://jcflorville.github.io"
   puts "  https://github.com/jags84/RSpec-Pre-commit-Git-Hook "
+  puts ""
+  puts " Forked from:"
+  puts "  https://github.com/markhazlett/RSpec-Pre-commit-Git-Hook"
   puts "\n==============================================================\n"
 end
 
