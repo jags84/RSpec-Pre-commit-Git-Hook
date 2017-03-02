@@ -1,38 +1,86 @@
 #!/usr/bin/env ruby
 require 'pty'
-html_path = "rspec_results.html"
-begin
-  PTY.spawn( "rspec spec --format h > rspec_results.html" ) do |stdin, stdout, pid|
+require 'nokogiri'
+
+def run_rspec_test
   begin
-    stdin.each { |line| print line }
-  rescue Errno::EIO
+    PTY.spawn( "RAILS_ENV=test rspec spec --format h > rspec_results.html" ) do |stdin, stdout, pid|
+      print "\nRunning RSpec..."
+      $th = Thread.new do
+        loop do
+          chars = %w[| / - \\]
+          delay = 1.0/5
+          8.times do |i|
+             print chars[i % chars.length]
+             sleep delay
+             print "\b"
+          end #End Times Loop
+        end # End Loop
+      end # End Thread
+
+      begin
+        stdin.each { |line| print line }
+      rescue Errno::EIO
+      end # End Begin
+    end #End PTY
+  rescue PTY::ChildExited
+    puts "Child process exit!"
+  end #End Begin
+  Thread.kill($th)
+end
+
+def print_results
+  # Path to HTML
+  html_path = "rspec_results.html"
+  html = open(html_path).read
+  examples = html.match(/(\d+) examples/)[0].to_i rescue 0
+  errors = html.match(/(\d+) errors/)[0].to_i rescue 0
+  if errors == 0 then
+    errors = html.match(/(\d+) failure/)[0].to_i rescue 0
+  end
+  pending = html.match(/(\d+) pending/)[0].to_i rescue 0
+
+  if errors.zero?
+    puts "\b \nRSpec Results:"
+    if pending > 0
+      puts "\033[32m#{examples} run, 0 failed! ,\033[0m \033[33m#{pending} pending\033[0m\n\n"
+    else
+      puts "\033[32m#{examples} run, 0 failed! ,#{pending} pending\033[0m\n\n"
+    end
+    sleep 1
+    exit 0
+  else
+    doc = Nokogiri::HTML File.open('rspec_results.html', 'r')
+    spans = doc.css(".failed_spec_name")
+    puts "\b \nRSpec Results:"
+    if pending > 0
+      puts "\033[31m #{examples} run, #{errors} failed!,\033[0m \033[33m#{pending} pending\033[0m\n\n"
+    else
+      puts "\033[31m #{examples} run, #{errors} failed!,#{pending} pending\033[0m\n\n"
+    end
+    puts "Details:"
+    spans.each_with_index do |e,index|
+      puts "\b\033[31m #{index+1}. #{e.content}\033[0m\n"
+    end
+    sleep 1
+    puts "\nYour commit faild, view your rspec results at #{File.expand_path(html_path)}\n\n"
+    exit 1
   end
 end
-rescue PTY::ChildExited
-  puts "Child process exit!"
+
+def print_authors
+  puts "\n==============================================================\n\n"
+  puts " Forked from:"
+  puts " https://github.com/markhazlett/RSpec-Pre-commit-Git-Hook"
+  puts ""
+  puts " Library to run RSpec before git commit"
+  puts "  https://jags84.github.io"
+  puts "  https://jcflorville.github.io"
+  puts "  https://github.com/jags84/RSpec-Pre-commit-Git-Hook "
+  puts "\n==============================================================\n"
 end
 
-# find out if there were any errors  
-html = open(html_path).read
-examples = html.match(/(\d+) examples/)[0].to_i rescue 0
-errors = html.match(/(\d+) errors/)[0].to_i rescue 0
-if errors == 0 then
-  errors = html.match(/(\d+) failure/)[0].to_i rescue 0
-end
-pending = html.match(/(\d+) pending/)[0].to_i rescue 0
-
-if errors.zero?
-  puts "0 failed! #{examples} run, #{pending} pending"
-  # HTML Output when tests ran successfully:
-  # puts "View spec results at #{File.expand_path(html_path)}"
-  sleep 1
-  exit 0
-else
-  puts "\aCOMMIT FAILED!!"
-  puts "View your rspec results at #{File.expand_path(html_path)}"
-  puts
-  puts "#{errors} failed! #{examples} run, #{pending} pending"
-  # Open HTML Ooutput when tests failed
-  # `open #{html_path}`
-  exit 1
-end
+# Run Methods
+print_authors()
+run_rspec_test()
+print_results()
