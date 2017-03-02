@@ -1,7 +1,7 @@
 RSpec Git Pre-commit Hook
 =========
 
-This is a improve version of the rspec-precommit from https://markhazlett/RSpec-Pre-commit-Git-Hook
+This is an improve version of the rspec-precommit from [a link]https://markhazlett/RSpec-Pre-commit-Git-Hook
 
 We add the this features
 
