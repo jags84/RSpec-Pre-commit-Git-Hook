@@ -12,11 +12,18 @@ We add the this features
 
 The scripts will invoke your rspec tests and not allow you to commit unless they are all passing/pending. If any failures occur then it will stop the commit from going through to allow you to fix your tests.
 
-Usage
+Install
 -----
 
 1. Copy the rspec-precommit file into your ```.git/hooks``` directory.
 2. Call the rspec-precommit from the pre-commit ```ruby .git/hooks/rspec-precommit``` (example in pre-commit file in repo)
-2. Try to perform a git commit -m with a failing Rspect test.
 
+Usage
+-----
+
+1. Try to perform a ```git commit -m ``` with a failing Rspect test.
+2. To skip validation use ```--no-verify```
+
+Troubleshoot
+-----
 If the hook is not getting executed, call ```chmod +x .git/hooks/rspec-precommit``` to make it so!
